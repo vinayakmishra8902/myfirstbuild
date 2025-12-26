@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel</title>
+
+  <style>
+    body { font-family: Arial; background:#f1f5f9; display:flex; gap:20px; padding:20px; }
+    .users, .chat { background:white; padding:15px; border-radius:12px; width:45%; }
+    .user { padding:8px; cursor:pointer; border-bottom:1px solid #eee; }
+    .user:hover { background:#f9fafb; }
+    #messages { min-height:250px; border:1px solid #ddd; padding:10px; border-radius:10px; margin-top:10px; }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+
+<body>
+
+  <div class="users">
+    <h3>Users</h3>
+    <div id="userList"></div>
+  </div>
+
+  <div class="chat">
+    <h3 id="title">Select a user</h3>
+
+    <div id="messages"></div>
+
+    <input id="reply" placeholder="Type reply...">
+    <button onclick="sendReply()">Send</button>
+  </div>
+
+  <script>
+    // ONLY you should know this password — very basic protection for now
+    const adminPass = prompt("Enter admin password:");
+    if (adminPass !== "admin123") window.location.href = "index.html";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyChFehhMdGREwt7-iV30FtuYfSMTp5A9xw",
+      authDomain: "replyisnmtant.firebaseapp.com",
+      projectId: "replyisnmtant",
+      storageBucket: "replyisnmtant.firebasestorage.app",
+      messagingSenderId: "196562164334",
+      appId: "1:196562164334:web:a3b4975f6b76291a65647f"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const userList = document.getElementById("userList");
+    const messagesDiv = document.getElementById("messages");
+    const title = document.getElementById("title");
+
+    let currentUser = null;
+
+    // load all users who have chats
+    db.collection("chats").onSnapshot(snap => {
+      userList.innerHTML = "";
+      snap.forEach(doc => {
+        const name = doc.id;
+        userList.innerHTML += `<div class="user" onclick="openChat('${name}')">${name}</div>`;
+      });
+    });
+
+    function openChat(name) {
+      currentUser = name;
+      title.textContent = "Chat with " + name;
+
+      db.collection("chats")
+        .doc(name)
+        .collection("messages")
+        .orderBy("time")
+        .onSnapshot(snap => {
+          messagesDiv.innerHTML = "";
+          snap.forEach(d => {
+            const m = d.data();
+            messagesDiv.innerHTML += `<p><b>${m.from}:</b> ${m.text}</p>`;
+          });
+        });
+    }
+
+    function sendReply() {
+      if (!currentUser) return;
+      const box = document.getElementById("reply");
+      const text = box.value.trim();
+      if (!text) return;
+
+      db.collection("chats")
+        .doc(currentUser)
+        .collection("messages")
+        .add({
+          from: "admin",
+          text,
+          time: Date.now()
+        });
+
+      box.value = "";
+    }
+  </script>
+
+</body>
+</html>
