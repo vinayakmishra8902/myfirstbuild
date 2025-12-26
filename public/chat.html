@@ -6,10 +6,14 @@
   <style>
     body { font-family: Arial; background:#f9fafb; }
     .box { max-width:520px; margin:40px auto; padding:20px; background:white; border-radius:14px; }
-    #chat { min-height:180px; border:1px solid #ddd; padding:10px; border-radius:8px; margin-bottom:10px; }
+    #chat { min-height:200px; border:1px solid #ddd; padding:10px; border-radius:8px; margin-bottom:10px; }
     input { width:100%; padding:10px; }
     button { width:100%; margin-top:6px; padding:10px; cursor:pointer; }
   </style>
+
+  <!-- Firebase libraries -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </head>
 
 <body>
@@ -24,34 +28,51 @@
 
   <script>
     const user = JSON.parse(localStorage.getItem("currentUser"));
-    let messages = JSON.parse(localStorage.getItem("messages") || "[]");
+    if (!user) window.location.href = "login.html";
 
-    if (!user) {
-      window.location.href = "login.html";
-    }
+    // --- Firebase config (YOUR VALUES HERE) ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyChFehhMdGREwt7-iV30FtuYfSMTp5A9xw",
+      authDomain: "replyisnmtant.firebaseapp.com",
+      projectId: "replyisnmtant",
+      storageBucket: "replyisnmtant.firebasestorage.app",
+      messagingSenderId: "196562164334",
+      appId: "1:196562164334:web:a3b4975f6b76291a65647f"
+    };
 
-    function render() {
-      const chat = document.getElementById("chat");
-      chat.innerHTML = "";
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-      messages.forEach(m => {
-        chat.innerHTML += `<p><b>${m.from}:</b> ${m.text}</p>`;
+    const chatDiv = document.getElementById("chat");
+
+    function render(list) {
+      chatDiv.innerHTML = "";
+      list.forEach(m => {
+        chatDiv.innerHTML += `<p><b>${m.from}:</b> ${m.text}</p>`;
       });
     }
+
+    // listen for realtime updates
+    db.collection("messages").orderBy("time")
+      .onSnapshot(snapshot => {
+        const arr = [];
+        snapshot.forEach(doc => arr.push(doc.data()));
+        render(arr);
+      });
 
     function send() {
       const box = document.getElementById("text");
       const text = box.value.trim();
       if (!text) return;
 
-      messages.push({ from: user.name, text });
-      localStorage.setItem("messages", JSON.stringify(messages));
+      db.collection("messages").add({
+        from: user.name,
+        text,
+        time: Date.now()
+      });
 
       box.value = "";
-      render();
     }
-
-    render();
   </script>
 </body>
 </html>
