@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+
+  <style>
+    body { font-family: Arial; background:#f3f4f6; }
+    .box { max-width:420px; margin:50px auto; padding:20px; background:white; border-radius:14px; }
+    input { width:100%; padding:10px; margin:6px 0; }
+    button { width:100%; padding:10px; cursor:pointer; margin-top:6px; }
+    #msg { margin-top:8px; color:red; }
+  </style>
+</head>
+
+<body>
+  <div class="box">
+    <h2>Welcome ✨</h2>
+
+    <input id="name" placeholder="Enter your name">
+    <input id="password" type="password" placeholder="Enter your password">
+
+    <button onclick="login()">Login</button>
+
+    <div id="msg"></div>
+  </div>
+
+  <script>
+    // users with image + message
+    const users = {
+      "rahul": {
+        password: "1234",
+        image: "https://via.placeholder.com/120",
+        message: "Rahul, thanks for always being there! 😊"
+      },
+      "riya": {
+        password: "abcd",
+        image: "https://via.placeholder.com/120",
+        message: "Riya, you always make people smile 🌸"
+      },
+      "aman": {
+        password: "0011",
+        image: "https://via.placeholder.com/120",
+        message: "Aman, I’m proud of you 💪"
+      }
+    };
+
+    function login() {
+      const name = document.getElementById("name").value.toLowerCase();
+      const pass = document.getElementById("password").value;
+      const box  = document.getElementById("msg");
+
+      if (!users[name]) {
+        box.textContent = "User not found";
+        return;
+      }
+
+      if (users[name].password !== pass) {
+        box.textContent = "Wrong password";
+        return;
+      }
+
+      // Save user data for next page
+      localStorage.setItem("currentUser", JSON.stringify({
+        name,
+        image: users[name].image,
+        message: users[name].message
+      }));
+
+      // go to profile page
+      window.location.href = "profile.html";
+    }
+  </script>
+</body>
+</html>
