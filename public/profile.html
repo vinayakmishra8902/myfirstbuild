@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Your Page</title>
+
+  <style>
+    body { font-family: Arial; background:#eef2ff; }
+    .card { max-width:450px; margin:60px auto; padding:20px; background:white; border-radius:16px; text-align:center; }
+    img { width:120px; height:120px; border-radius:50%; object-fit:cover; }
+    .msg { margin-top:12px; font-size:18px; }
+    button { margin-top:18px; padding:10px 16px; cursor:pointer; }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h2>For You ❤️</h2>
+
+    <img id="pic">
+
+    <div class="msg" id="text"></div>
+
+    <button onclick="start()">Start Conversation</button>
+  </div>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem("currentUser"));
+
+    if (!user) {
+      window.location.href = "login.html";
+    }
+
+    document.getElementById("pic").src = user.image;
+    document.getElementById("text").textContent = user.message;
+
+    function start() {
+      window.location.href = "chat.html";
+    }
+  </script>
+</body>
+</html>
